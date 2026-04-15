@@ -1,93 +1,65 @@
-const API = "http://localhost:5000";
+const taskList = document.getElementById("taskList");
+const input = document.getElementById("taskInput");
 
-async function loadLists() {
-  const res = await fetch(`${API}/lists`);
-  const lists = await res.json();
+let tasks = [];
 
-  const ul = document.getElementById("lists");
-  ul.innerHTML = "";
+function addTask() {
+  if (input.value.trim() === "") return;
 
-  lists.forEach(list => {
+  tasks.push({
+    text: input.value,
+    done: false
+  });
+
+  input.value = "";
+  render();
+}
+
+function toggleTask(index) {
+  tasks[index].done = !tasks[index].done;
+  render();
+}
+
+function deleteTask(index) {
+  tasks.splice(index, 1);
+  render();
+}
+
+function clearCompleted() {
+  tasks = tasks.filter(t => !t.done);
+  render();
+}
+
+function render() {
+  taskList.innerHTML = "";
+
+  tasks.forEach((task, i) => {
     const li = document.createElement("li");
+
     li.innerHTML = `
-      <span onclick="viewList('${list._id}')">${list.title}</span>
-      <button onclick="deleteList('${list._id}')">❌</button>
+      <div class="task-left">
+        <input type="checkbox" ${task.done ? "checked" : ""} 
+          onclick="toggleTask(${i})"/>
+        <span class="${task.done ? "completed" : ""}">
+          ${task.text}
+        </span>
+      </div>
+      <button onclick="deleteTask(${i})">x</button>
     `;
-    ul.appendChild(li);
-  });
-}
 
-async function createList() {
-  const title = document.getElementById("listTitle").value;
-
-  await fetch(`${API}/lists`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ title })
+    taskList.appendChild(li);
   });
 
-  loadLists();
+  document.getElementById("remaining").innerText =
+    `${tasks.filter(t => !t.done).length} remaining`;
 }
 
-async function viewList(id) {
-  const res = await fetch(`${API}/lists`);
-  const lists = await res.json();
-  const list = lists.find(l => l._id === id);
-
-  const div = document.getElementById("entriesSection");
-
-  div.innerHTML = `
-    <h2>${list.title}</h2>
-    <input id="entryText" placeholder="New entry">
-    <button onclick="addEntry('${id}')">Add</button>
-    <ul>
-      ${list.entries.map(e => `
-        <li>
-          <span style="text-decoration:${e.status ? 'line-through' : 'none'}">
-            ${e.text}
-          </span>
-          <button onclick="toggle('${id}','${e._id}')">✔</button>
-          <button onclick="deleteEntry('${id}','${e._id}')">❌</button>
-        </li>
-      `).join("")}
-    </ul>
-  `;
-}
-
-async function addEntry(id) {
-  const text = document.getElementById("entryText").value;
-
-  await fetch(`${API}/lists/${id}/entries`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text })
+// date
+const today = new Date();
+document.getElementById("date").innerText =
+  today.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric"
   });
-
-  viewList(id);
-}
-
-async function toggle(listId, entryId) {
-  await fetch(`${API}/lists/${listId}/entries/${entryId}`, {
-    method: "PUT"
-  });
-
-  viewList(listId);
-}
-
-async function deleteEntry(listId, entryId) {
-  await fetch(`${API}/lists/${listId}/entries/${entryId}`, {
-    method: "DELETE"
-  });
-
-  viewList(listId);
-}
-
-async function deleteList(id) {
-  await fetch(`${API}/lists/${id}`, {
-    method: "DELETE"
-  });
-
-  loadLists();
-}
-
-loadLists();

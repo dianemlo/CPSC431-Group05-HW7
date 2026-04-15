@@ -1,19 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>To-Do App</title>
+  <title>Things To Do</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>To-Do Lists</h1>
+<div class="container">
 
-<input id="listTitle" placeholder="New List Title">
-<button onclick="createList()">Create List</button>
+  <h1 class="title">things to do</h1>
+  <p class="subtitle">ephemeris</p>
+  <p class="date" id="date"></p>
 
-<ul id="lists"></ul>
+  <div class="input-section">
+    <input id="taskInput" placeholder="add a new task..." />
+    <button onclick="addTask()">+</button>
+  </div>
 
-<div id="entriesSection"></div>
+  <div class="filters">
+    <button>ALL</button>
+    <button>ACTIVE</button>
+    <button>DONE</button>
+  </div>
+
+  <ul id="taskList"></ul>
+
+  <div class="footer">
+    <span id="remaining"></span>
+    <button onclick="clearCompleted()">CLEAR COMPLETED</button>
+  </div>
+
+</div>
 
 <script src="script.js"></script>
 </body>
